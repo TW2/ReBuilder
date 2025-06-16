@@ -8,6 +8,7 @@ import org.wingate.rebuilder.widget.ReFrame;
 import org.wingate.rebuilder.widget.WidgetAbstract;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -15,6 +16,9 @@ import java.awt.event.MouseEvent;
 
 public class MainFrame extends JFrame {
 
+    private final DefaultMutableTreeNode rootNode;
+    private final JTree treeList;
+    private final RSyntaxTextArea codeArea;
     private final JList<WidgetAbstract<?>> widgetsList;
     private final DefaultListModel<WidgetAbstract<?>> widgetsModel;
     private final DesignPanel designPanel;
@@ -28,11 +32,12 @@ public class MainFrame extends JFrame {
 
         // Left: tree list + code
         JPanel codePanel = new JPanel(new BorderLayout());
-        JTree treeList = new JTree();
+        rootNode = new DefaultMutableTreeNode("+");
+        treeList = new JTree(rootNode);
         JScrollPane scrollPane = new JScrollPane(treeList);
         scrollPane.setPreferredSize(new Dimension(280, scrollPane.getHeight()));
         codePanel.add(scrollPane, BorderLayout.WEST);
-        RSyntaxTextArea codeArea = new RSyntaxTextArea(20, 60);
+        codeArea = new RSyntaxTextArea(20, 60);
         codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
         codeArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(codeArea);
@@ -140,7 +145,21 @@ public class MainFrame extends JFrame {
                 ReFrame x = new ReFrame();
                 x.setPreviewParentSize(designPanel.getSize());
                 designPanel.getWidgets().add(x);
+                addToRoot(x);
+
+                String xml = ReFrame.saveXMLToText(x);
+                codeArea.setText(xml);
+                codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
             }
+        }
+    }
+
+    private void addToRoot(WidgetAbstract<?> widget){
+        rootNode.add(new DefaultMutableTreeNode(widget));
+
+        // Expand all
+        for (int i = 0; i < treeList.getRowCount(); i++) {
+            treeList.expandRow(i);
         }
     }
 }
