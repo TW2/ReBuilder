@@ -3,6 +3,7 @@ package org.wingate.rebuilder;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.wingate.rebuilder.ui.DesignPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,8 +33,9 @@ public class MainFrame extends JFrame {
 
         // Right: ui designer + properties + movable widgets
         JPanel rightPanel = new JPanel(new BorderLayout());
-        JPanel embedPanel = new JPanel(new BorderLayout()); // that contains designer
-        embedPanel.setBackground(new Color(200,200,200));
+        JPanel embedPanel = new JPanel(new BorderLayout());
+        DesignPanel designPanel = new DesignPanel();
+        embedPanel.add(designPanel, BorderLayout.CENTER);
         JPanel toolsPanel = new JPanel(new GridLayout(1,2,2,2));
         toolsPanel.setPreferredSize(new Dimension(toolsPanel.getWidth(), 200));
         JTable propsTable = new JTable();
