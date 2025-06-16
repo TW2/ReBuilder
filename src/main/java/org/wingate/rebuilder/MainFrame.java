@@ -1,5 +1,9 @@
 package org.wingate.rebuilder;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,9 +12,37 @@ public class MainFrame extends JFrame {
 
     public MainFrame() throws HeadlessException {
         setJMenuBar(createMenuBar());
-        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JPanel mainPanel = new JPanel(new GridLayout(1,2, 2, 2));
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPanel, BorderLayout.CENTER);
+
+        // Left: tree list + code
+        JPanel codePanel = new JPanel(new BorderLayout());
+        JTree treeList = new JTree();
+        JScrollPane scrollPane = new JScrollPane(treeList);
+        scrollPane.setPreferredSize(new Dimension(280, scrollPane.getHeight()));
+        codePanel.add(scrollPane, BorderLayout.WEST);
+        RSyntaxTextArea codeArea = new RSyntaxTextArea(20, 60);
+        codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        codeArea.setCodeFoldingEnabled(true);
+        RTextScrollPane sp = new RTextScrollPane(codeArea);
+        codePanel.add(sp, BorderLayout.CENTER);
+        mainPanel.add(codePanel);
+
+        // Right: ui designer + properties + movable widgets
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        JPanel embedPanel = new JPanel(new BorderLayout()); // that contains designer
+        embedPanel.setBackground(new Color(200,200,200));
+        JPanel toolsPanel = new JPanel(new GridLayout(1,2,2,2));
+        toolsPanel.setPreferredSize(new Dimension(toolsPanel.getWidth(), 200));
+        JTable propsTable = new JTable();
+        JList<Object> widgetsList = new JList<>();
+        toolsPanel.add(propsTable);
+        toolsPanel.add(widgetsList);
+        rightPanel.add(embedPanel, BorderLayout.CENTER);
+        rightPanel.add(toolsPanel, BorderLayout.SOUTH);
+        mainPanel.add(rightPanel);
     }
 
     private JMenuBar createMenuBar(){
