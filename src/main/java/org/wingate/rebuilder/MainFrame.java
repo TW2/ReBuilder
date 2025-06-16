@@ -9,6 +9,7 @@ import org.wingate.rebuilder.widget.WidgetAbstract;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -29,6 +30,11 @@ public class MainFrame extends JFrame {
         JPanel mainPanel = new JPanel(new GridLayout(1,2, 2, 2));
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPanel, BorderLayout.CENTER);
+        JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+        getContentPane().add(toolBar, BorderLayout.NORTH);
+        JButton btnRefresh = new JButton("Refresh");
+        btnRefresh.addActionListener(this::btnRefreshActionListener);
+        toolBar.add(btnRefresh);
 
         // Left: tree list + code
         JPanel codePanel = new JPanel(new BorderLayout());
@@ -126,6 +132,35 @@ public class MainFrame extends JFrame {
 
     private void closeProjectActionListener(ActionEvent e){
 
+    }
+
+    private void btnRefreshActionListener(ActionEvent e){
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                treeList.getLastSelectedPathComponent();
+        TreeModel model = treeList.getModel();
+        if(model.isLeaf(node)){
+            switch(node.getUserObject()){
+                case ReFrame _ -> {
+                    ReFrame r = ReFrame.readXMLFromText(codeArea.getText());
+                    int index = -1;
+                    for(int i=0; i<designPanel.getWidgets().size(); i++){
+                        WidgetAbstract<?> w = designPanel.getWidgets().get(i);
+                        if(w instanceof ReFrame){
+                            index = i;
+                            break;
+                        }
+                    }
+                    if(index != -1){
+                        // Replace
+                        r.setPreviewParentSize(designPanel.getSize());
+                        designPanel.getWidgets().set(index, r);
+                        node.setUserObject(r);
+                        designPanel.repaint();
+                    }
+                }
+                default -> {}
+            }
+        }
     }
 
     private void populateWidgets(){
