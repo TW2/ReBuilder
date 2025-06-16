@@ -4,12 +4,20 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.wingate.rebuilder.ui.DesignPanel;
+import org.wingate.rebuilder.widget.ReFrame;
+import org.wingate.rebuilder.widget.WidgetAbstract;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MainFrame extends JFrame {
+
+    private final JList<WidgetAbstract<?>> widgetsList;
+    private final DefaultListModel<WidgetAbstract<?>> widgetsModel;
+    private final DesignPanel designPanel;
 
     public MainFrame() throws HeadlessException {
         setJMenuBar(createMenuBar());
@@ -34,12 +42,25 @@ public class MainFrame extends JFrame {
         // Right: ui designer + properties + movable widgets
         JPanel rightPanel = new JPanel(new BorderLayout());
         JPanel embedPanel = new JPanel(new BorderLayout());
-        DesignPanel designPanel = new DesignPanel();
+        designPanel = new DesignPanel();
         embedPanel.add(designPanel, BorderLayout.CENTER);
         JPanel toolsPanel = new JPanel(new GridLayout(1,2,2,2));
         toolsPanel.setPreferredSize(new Dimension(toolsPanel.getWidth(), 200));
         JTable propsTable = new JTable();
-        JList<Object> widgetsList = new JList<>();
+        widgetsList = new JList<>();
+        widgetsModel = new DefaultListModel<>();
+        widgetsList.setModel(widgetsModel);
+        widgetsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2){
+                    addReFrameOneTimeIfSelected();
+                    designPanel.repaint();
+                }
+            }
+        });
+        populateWidgets();
         toolsPanel.add(propsTable);
         toolsPanel.add(widgetsList);
         rightPanel.add(embedPanel, BorderLayout.CENTER);
@@ -100,5 +121,26 @@ public class MainFrame extends JFrame {
 
     private void closeProjectActionListener(ActionEvent e){
 
+    }
+
+    private void populateWidgets(){
+        widgetsModel.addElement(new ReFrame());
+    }
+
+    private void addReFrameOneTimeIfSelected(){
+        if(widgetsList.getSelectedValue() instanceof ReFrame){
+            boolean add = true;
+            for(WidgetAbstract<?> w : designPanel.getWidgets()){
+                if(w instanceof ReFrame){
+                    add = false;
+                    break;
+                }
+            }
+            if(add){
+                ReFrame x = new ReFrame();
+                x.setPreviewParentSize(designPanel.getSize());
+                designPanel.getWidgets().add(x);
+            }
+        }
     }
 }
